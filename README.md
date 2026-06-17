@@ -12,11 +12,7 @@ Instead of SDRs spending hours on LinkedIn or Crunchbase looking for signals, Le
 
 ---
 
-## 🎥 Demo Walkthrough
 
-> Loom video link: _(attach your recorded video here)_
-
----
 
 ## 🚀 Live Setup — Run in 3 Steps
 
