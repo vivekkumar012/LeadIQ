@@ -22,11 +22,12 @@ export default function LeadDetailPage() {
   const [loading, setLoading] = useState(true)
   const [rescoring, setRescoring] = useState(false)
   const [chatMessages, setChatMessages] = useState([
-    { role: 'assistant', content: 'Hi! I\'m your AI sales assistant. Ask me anything about this company — outreach strategies, talking points, email drafts, or company analysis.' }
+    { role: 'assistant', content: "Hi! I'm your AI sales assistant. Ask me anything about this company — outreach strategies, talking points, email drafts, or company analysis." }
   ])
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
+  const [statusOpen, setStatusOpen] = useState(false)
   const chatEndRef = useRef(null)
 
   useEffect(() => {
@@ -65,6 +66,7 @@ export default function LeadDetailPage() {
     try {
       const updated = await leadsApi.update(id, { status })
       setLead(updated)
+      setStatusOpen(false)
       toast.success(`Status → ${status}`)
     } catch (e) {
       toast.error(e.message)
@@ -90,19 +92,17 @@ export default function LeadDetailPage() {
   }
 
   if (loading) return (
-    <div className="p-6 space-y-4">
-      <Skeleton className="h-8 w-48 rounded-lg" />
-      <div className="grid grid-cols-3 gap-4">
-        <Skeleton className="h-48 rounded-xl col-span-2" />
-        <Skeleton className="h-48 rounded-xl" />
-      </div>
+    <div className="p-4 sm:p-6 space-y-4">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-40 sm:h-48" />
+      <Skeleton className="h-10" />
     </div>
   )
 
   if (!lead) return null
 
   return (
-    <div className="p-6 space-y-5 animate-fade-in-up">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       {/* Back */}
       <button
         onClick={() => navigate('/leads')}
@@ -112,37 +112,48 @@ export default function LeadDetailPage() {
       </button>
 
       {/* Hero card */}
-      <Card className="p-6">
-        <div className="flex items-start gap-5 flex-wrap">
+      <Card className="p-4 sm:p-6">
+        <div className="flex items-start gap-3 sm:gap-5">
           {/* Avatar */}
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${getCompanyColor(lead.companyName)}
-            flex items-center justify-center text-xl font-700 text-white shadow-xl shrink-0`}>
+          <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${getCompanyColor(lead.companyName)}
+            flex items-center justify-center text-base sm:text-xl font-bold text-white shadow-xl shrink-0`}>
             {getInitials(lead.companyName)}
           </div>
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap mb-2">
-              <h1 className="text-xl font-700 text-white">{lead.companyName}</h1>
-              <Badge className={getIntentBg(lead.intentLabel)}>{lead.intentLabel}</Badge>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-base sm:text-xl font-bold text-white">{lead.companyName}</h1>
+                <Badge className={getIntentBg(lead.intentLabel)}>{lead.intentLabel}</Badge>
+              </div>
+              {/* Score ring — top right on mobile */}
+              <div className="flex flex-col items-center gap-0.5 shrink-0 sm:hidden">
+                <div className="relative">
+                  <ScoreRing score={lead.intentScore} size={52} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-sm font-bold text-white">{lead.intentScore}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] text-slate-500">Score</span>
+              </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-slate-400 flex-wrap mb-3">
+            <div className="flex items-center gap-3 text-xs text-slate-400 flex-wrap mb-2">
               {lead.industry && <span className="flex items-center gap-1"><Building2 size={11} />{lead.industry}</span>}
               {lead.location && <span className="flex items-center gap-1"><MapPin size={11} />{lead.location}</span>}
-              {lead.size && <span className="flex items-center gap-1"><Users size={11} />{lead.size} employees</span>}
-              {lead.stage && <span className="flex items-center gap-1"><Star size={11} />{lead.stage}</span>}
+              {lead.size && <span className="hidden sm:flex items-center gap-1"><Users size={11} />{lead.size} employees</span>}
             </div>
             {lead.description && (
-              <p className="text-sm text-slate-400 leading-relaxed">{lead.description}</p>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed line-clamp-3 sm:line-clamp-none">{lead.description}</p>
             )}
           </div>
 
-          {/* Score ring */}
-          <div className="flex flex-col items-center gap-1 shrink-0">
+          {/* Score ring — desktop */}
+          <div className="hidden sm:flex flex-col items-center gap-1 shrink-0">
             <div className="relative">
               <ScoreRing score={lead.intentScore} size={72} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-lg font-700 text-white">{lead.intentScore}</span>
+                <span className="text-lg font-bold text-white">{lead.intentScore}</span>
               </div>
             </div>
             <span className="text-[11px] text-slate-500">Intent Score</span>
@@ -150,25 +161,30 @@ export default function LeadDetailPage() {
         </div>
 
         {/* Actions bar */}
-        <div className="flex items-center gap-2 mt-5 pt-4 border-t border-white/[0.06] flex-wrap">
+        <div className="flex items-center gap-2 mt-4 sm:mt-5 pt-4 border-t border-white/[0.06] flex-wrap">
           {/* Status dropdown */}
-          <div className="relative group">
-            <Button variant="secondary" size="sm">
+          <div className="relative">
+            <button
+              onClick={() => setStatusOpen(!statusOpen)}
+              className="inline-flex items-center gap-1.5 h-7 px-3 rounded-lg bg-white/[0.06] border border-white/[0.08] text-xs font-medium text-slate-200 hover:bg-white/[0.1] transition-all"
+            >
               <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
-              <ChevronDown size={12} />
-            </Button>
-            <div className="absolute top-full left-0 mt-1 bg-[#1e293b] border border-white/[0.1] rounded-xl shadow-2xl z-10 py-1 min-w-36 hidden group-hover:block">
-              {STATUS_OPTIONS.map(s => (
-                <button
-                  key={s}
-                  onClick={() => handleStatusChange(s)}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-300 hover:bg-white/[0.06] transition-all"
-                >
-                  {lead.status === s && <Check size={11} className="text-indigo-400" />}
-                  <span className={lead.status === s ? 'ml-0' : 'ml-3.5'}>{s}</span>
-                </button>
-              ))}
-            </div>
+              <ChevronDown size={11} className={`transition-transform ${statusOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {statusOpen && (
+              <div className="absolute top-full left-0 mt-1 bg-[#1e293b] border border-white/[0.1] rounded-xl shadow-2xl z-10 py-1 min-w-36">
+                {STATUS_OPTIONS.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => handleStatusChange(s)}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-slate-300 hover:bg-white/[0.06] transition-all"
+                  >
+                    {lead.status === s && <Check size={11} className="text-indigo-400" />}
+                    <span className={lead.status === s ? '' : 'ml-3.5'}>{s}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {lead.website && (
@@ -177,7 +193,9 @@ export default function LeadDetailPage() {
               target="_blank" rel="noopener noreferrer"
             >
               <Button variant="secondary" size="sm">
-                <Globe size={13} /> Website <ExternalLink size={11} />
+                <Globe size={13} />
+                <span className="hidden sm:inline">Website</span>
+                <ExternalLink size={11} />
               </Button>
             </a>
           )}
@@ -185,16 +203,18 @@ export default function LeadDetailPage() {
           {lead.linkedinUrl && (
             <a href={lead.linkedinUrl} target="_blank" rel="noopener noreferrer">
               <Button variant="secondary" size="sm">
-                <Link2 size={13} /> LinkedIn
+                <Link2 size={13} />
+                <span className="hidden sm:inline">LinkedIn</span>
               </Button>
             </a>
           )}
 
           <Button onClick={handleRescore} loading={rescoring} variant="secondary" size="sm">
-            <Zap size={13} /> Re-score AI
+            <Zap size={13} />
+            <span className="hidden sm:inline">Re-score AI</span>
           </Button>
 
-          <div className="ml-auto text-xs text-slate-600">
+          <div className="ml-auto text-xs text-slate-600 hidden sm:block">
             Scanned {formatDate(lead.scannedAt)}
           </div>
         </div>
@@ -206,34 +226,34 @@ export default function LeadDetailPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 h-8 rounded-lg text-xs font-500 capitalize transition-all
+            className={`flex-1 h-8 rounded-lg text-[11px] sm:text-xs font-medium capitalize transition-all
               ${activeTab === tab
                 ? 'bg-indigo-500/20 text-indigo-400'
                 : 'text-slate-500 hover:text-slate-300'}`}
           >
-            {tab === 'ai chat' && <MessageSquare size={11} className="inline mr-1" />}
-            {tab}
+            {tab === 'ai chat'
+              ? <><MessageSquare size={11} className="inline mr-0.5 sm:mr-1" /><span className="hidden sm:inline">AI </span>Chat</>
+              : tab
+            }
           </button>
         ))}
       </div>
 
       {/* Tab content */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fade-in-up">
-          {/* AI Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {lead.aiSummary && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5 sm:col-span-1">
               <div className="flex items-center gap-2 mb-3">
                 <Zap size={14} className="text-indigo-400" />
-                <h3 className="text-sm font-600 text-white">AI Analysis</h3>
+                <h3 className="text-sm font-semibold text-white">AI Analysis</h3>
               </div>
-              <p className="text-sm text-slate-400 leading-relaxed">{lead.aiSummary}</p>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{lead.aiSummary}</p>
             </Card>
           )}
 
-          {/* Details */}
-          <Card className="p-5">
-            <h3 className="text-sm font-600 text-white mb-3">Company Details</h3>
+          <Card className="p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-white mb-3">Company Details</h3>
             <div className="space-y-2.5">
               {[
                 { label: 'Industry', value: lead.industry },
@@ -244,19 +264,18 @@ export default function LeadDetailPage() {
                 { label: 'Website', value: lead.website },
               ].filter(f => f.value).map(f => (
                 <div key={f.label} className="flex items-start gap-3">
-                  <span className="text-xs text-slate-600 w-20 shrink-0 pt-0.5">{f.label}</span>
-                  <span className="text-xs text-slate-300 flex-1">{f.value}</span>
+                  <span className="text-xs text-slate-600 w-16 sm:w-20 shrink-0 pt-0.5">{f.label}</span>
+                  <span className="text-xs text-slate-300 flex-1 break-words">{f.value}</span>
                 </div>
               ))}
             </div>
           </Card>
 
-          {/* Tags */}
           {lead.tags?.length > 0 && (
-            <Card className="p-5">
+            <Card className="p-4 sm:p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Tag size={14} className="text-slate-500" />
-                <h3 className="text-sm font-600 text-white">Tags</h3>
+                <h3 className="text-sm font-semibold text-white">Tags</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {lead.tags.map((tag, i) => (
@@ -269,22 +288,22 @@ export default function LeadDetailPage() {
       )}
 
       {activeTab === 'signals' && (
-        <div className="space-y-3 animate-fade-in-up">
-          {lead.signals?.length === 0 ? (
+        <div className="space-y-3">
+          {!lead.signals?.length ? (
             <Card className="p-8 text-center">
               <p className="text-sm text-slate-500">No signals detected for this company</p>
             </Card>
           ) : (
-            lead.signals?.map((sig, i) => (
+            lead.signals.map((sig, i) => (
               <Card key={i} className="p-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-xl">{getSignalIcon(sig.type)}</span>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xl shrink-0">{getSignalIcon(sig.type)}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Badge className={getSignalColor(sig.type)}>{sig.type}</Badge>
                       <span className="text-xs text-slate-600">{formatDate(sig.detectedAt)}</span>
                     </div>
-                    <p className="text-sm text-slate-300">{sig.description}</p>
+                    <p className="text-xs sm:text-sm text-slate-300">{sig.description}</p>
                     {sig.source && <p className="text-xs text-slate-600 mt-1">Source: {sig.source}</p>}
                   </div>
                 </div>
@@ -295,24 +314,27 @@ export default function LeadDetailPage() {
       )}
 
       {activeTab === 'contacts' && (
-        <div className="space-y-3 animate-fade-in-up">
-          {lead.contacts?.length === 0 ? (
+        <div className="space-y-3">
+          {!lead.contacts?.length ? (
             <Card className="p-8 text-center">
               <p className="text-sm text-slate-500">No contacts found for this company</p>
             </Card>
           ) : (
-            lead.contacts?.map((contact, i) => (
+            lead.contacts.map((contact, i) => (
               <Card key={i} className="p-4">
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getCompanyColor(contact.name)}
-                    flex items-center justify-center text-sm font-700 text-white`}>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${getCompanyColor(contact.name)}
+                    flex items-center justify-center text-sm font-bold text-white shrink-0`}>
                     {getInitials(contact.name)}
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-600 text-white">{contact.name}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold text-white">{contact.name}</div>
                     <div className="text-xs text-slate-500">{contact.title}</div>
+                    {contact.email && (
+                      <div className="text-xs text-slate-600 mt-0.5 truncate">{contact.email}</div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     {contact.email && (
                       <a href={`mailto:${contact.email}`} className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.06] transition-all">
                         <Mail size={14} />
@@ -325,9 +347,6 @@ export default function LeadDetailPage() {
                     )}
                   </div>
                 </div>
-                {contact.email && (
-                  <div className="mt-2 ml-14 text-xs text-slate-500">{contact.email}</div>
-                )}
               </Card>
             ))
           )}
@@ -335,27 +354,27 @@ export default function LeadDetailPage() {
       )}
 
       {activeTab === 'ai chat' && (
-        <Card className="flex flex-col h-[480px] animate-fade-in-up">
+        <Card className="flex flex-col" style={{ height: 'calc(100vh - 420px)', minHeight: '380px' }}>
           {/* Chat header */}
-          <div className="flex items-center gap-3 p-4 border-b border-white/[0.06]">
-            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center">
+          <div className="flex items-center gap-3 p-3 sm:p-4 border-b border-white/[0.06]">
+            <div className="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center shrink-0">
               <Zap size={14} className="text-indigo-400" />
             </div>
-            <div>
-              <div className="text-sm font-600 text-white">AI Sales Assistant</div>
-              <div className="text-[11px] text-slate-500">Powered by Llama 3.3 70B</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-semibold text-white">AI Sales Assistant</div>
+              <div className="text-[11px] text-slate-500 hidden sm:block">Powered by Llama 3.3 70B</div>
             </div>
-            <div className="ml-auto flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[11px] text-emerald-400">Online</span>
             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4">
             {chatMessages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed
+                <div className={`max-w-[85%] sm:max-w-[80%] rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm leading-relaxed
                   ${msg.role === 'user'
                     ? 'bg-indigo-500/20 text-indigo-100 border border-indigo-500/20'
                     : 'bg-white/[0.04] text-slate-300 border border-white/[0.06]'}`}
@@ -380,26 +399,26 @@ export default function LeadDetailPage() {
           </div>
 
           {/* Input */}
-          <div className="p-4 border-t border-white/[0.06]">
+          <div className="p-3 sm:p-4 border-t border-white/[0.06]">
             <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={chatInput}
                 onChange={e => setChatInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && sendChat()}
-                placeholder="Ask about outreach strategy, email drafts, company analysis..."
-                className="flex-1 h-9 px-3 text-sm bg-white/[0.04] border border-white/[0.08] rounded-lg
+                placeholder="Ask about outreach, email drafts..."
+                className="flex-1 h-9 px-3 text-xs sm:text-sm bg-white/[0.04] border border-white/[0.08] rounded-lg
                   text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 transition-all"
               />
               <Button onClick={sendChat} loading={chatLoading} size="sm">
                 <Send size={13} />
               </Button>
             </div>
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {['Draft outreach email', 'Key talking points', 'Why they need SDRs', 'Competitor analysis'].map(q => (
+            <div className="flex gap-1.5 mt-2 flex-wrap">
+              {['Draft email', 'Talking points', 'Why buy?', 'Competitors'].map(q => (
                 <button
                   key={q}
-                  onClick={() => { setChatInput(q); }}
+                  onClick={() => setChatInput(q)}
                   className="text-[10px] text-slate-600 hover:text-indigo-400 px-2 py-1 rounded-md bg-white/[0.02] hover:bg-indigo-500/10 border border-white/[0.04] transition-all"
                 >
                   {q}

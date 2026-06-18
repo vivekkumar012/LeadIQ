@@ -1,7 +1,7 @@
 // Badge
 export function Badge({ children, className = '' }) {
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-500 border ${className}`}>
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${className}`}>
       {children}
     </span>
   )
@@ -33,19 +33,19 @@ export function StatCard({ label, value, change, icon: Icon, accent = 'indigo', 
   const a = accents[accent] || accents.indigo
 
   return (
-    <Card className="p-5">
+    <Card className="p-4 sm:p-5">
       <div className="flex items-start justify-between mb-3">
         <div className={`w-9 h-9 rounded-lg ${a.bg} border ${a.border} flex items-center justify-center`}>
           <Icon size={16} className={a.text} />
         </div>
         {change !== undefined && (
-          <span className={`text-xs font-500 ${change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+          <span className={`text-xs font-medium ${change >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {change >= 0 ? '+' : ''}{change}%
           </span>
         )}
       </div>
-      <div className="text-2xl font-700 text-white mb-0.5">{value}</div>
-      <div className="text-xs text-slate-500 font-400">{label}</div>
+      <div className="text-xl sm:text-2xl font-bold text-white mb-0.5">{value}</div>
+      <div className="text-xs text-slate-500">{label}</div>
       {sub && <div className="text-[11px] text-slate-600 mt-1">{sub}</div>}
     </Card>
   )
@@ -77,7 +77,7 @@ export function ScoreRing({ score, size = 48 }) {
 
 // Skeleton
 export function Skeleton({ className = '' }) {
-  return <div className={`skeleton ${className}`} />
+  return <div className={`animate-pulse bg-white/[0.06] rounded-xl ${className}`} />
 }
 
 // Empty state
@@ -87,7 +87,7 @@ export function EmptyState({ icon: Icon, title, description, action }) {
       <div className="w-14 h-14 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-4">
         <Icon size={22} className="text-slate-500" />
       </div>
-      <h3 className="text-sm font-600 text-slate-300 mb-1">{title}</h3>
+      <h3 className="text-sm font-semibold text-slate-300 mb-1">{title}</h3>
       <p className="text-xs text-slate-500 max-w-xs mb-4">{description}</p>
       {action}
     </div>
@@ -113,7 +113,7 @@ export function Button({ children, variant = 'primary', size = 'md', loading = f
     <button
       {...props}
       disabled={loading || props.disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-lg font-500 transition-all duration-150
+      className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150
         disabled:opacity-50 disabled:cursor-not-allowed
         ${variants[variant]} ${sizes[size]} ${className}`}
     >
@@ -139,7 +139,7 @@ export function ScoreBar({ score }) {
           style={{ width: `${score}%` }}
         />
       </div>
-      <span className="text-xs font-600 text-slate-300 w-7 text-right">{score}</span>
+      <span className="text-xs font-semibold text-slate-300 w-7 text-right">{score}</span>
     </div>
   )
 }

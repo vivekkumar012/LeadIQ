@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Zap, Search, Globe, FileText, RefreshCw, CheckCircle,
-  ArrowRight, Sparkles, TrendingUp, Users, DollarSign, Hash
+  Zap, Search, FileText, CheckCircle,
+  ArrowRight, Sparkles
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { scanApi } from '../utils/api'
@@ -23,14 +23,10 @@ const INDUSTRIES = [
 ]
 
 export default function ScanPage() {
-  const [mode, setMode] = useState('discover') // discover | text
+  const [mode, setMode] = useState('discover')
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState([])
-  const [config, setConfig] = useState({
-    count: 8,
-    industry: '',
-    signalType: '',
-  })
+  const [config, setConfig] = useState({ count: 8, industry: '', signalType: '' })
   const [pastedText, setPastedText] = useState('')
   const [progress, setProgress] = useState(0)
   const navigate = useNavigate()
@@ -40,12 +36,9 @@ export default function ScanPage() {
       setLoading(true)
       setResults([])
       setProgress(0)
-
-      // Simulate progress
       const interval = setInterval(() => {
         setProgress(p => Math.min(p + Math.random() * 15, 90))
       }, 800)
-
       const data = await scanApi.discover(config)
       clearInterval(interval)
       setProgress(100)
@@ -74,18 +67,17 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in-up">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-7 h-7 rounded-lg bg-indigo-500/20 border border-indigo-500/20 flex items-center justify-center">
             <Zap size={14} className="text-indigo-400" />
           </div>
-          <h1 className="text-xl font-700 text-white">AI Lead Scanner</h1>
-          
+          <h1 className="text-lg sm:text-xl font-bold text-white">AI Lead Scanner</h1>
         </div>
-        <p className="text-sm text-slate-500">
-          Automatically discover and score companies using AI-powered intent signals
+        <p className="text-xs sm:text-sm text-slate-500">
+          Discover and score companies using AI-powered intent signals
         </p>
       </div>
 
@@ -98,27 +90,27 @@ export default function ScanPage() {
           <button
             key={id}
             onClick={() => setMode(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-500 transition-all
+            className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all
               ${mode === id
                 ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/20'
                 : 'text-slate-400 hover:text-slate-200 border border-white/[0.06] hover:bg-white/[0.04]'}`}
           >
-            <Icon size={14} /> {label}
+            <Icon size={13} /> {label}
           </button>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* Layout: stacked on mobile, side-by-side on lg */}
+      <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 sm:gap-5">
         {/* Config panel */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           {mode === 'discover' ? (
             <>
-              <Card className="p-5">
-                <h2 className="text-sm font-600 text-white mb-4">Discovery Settings</h2>
+              <Card className="p-4 sm:p-5">
+                <h2 className="text-sm font-semibold text-white mb-4">Discovery Settings</h2>
 
-                {/* Count */}
                 <div className="mb-4">
-                  <label className="text-xs text-slate-400 font-500 mb-2 block">
+                  <label className="text-xs text-slate-400 font-medium mb-2 block">
                     Leads to discover: <span className="text-indigo-400">{config.count}</span>
                   </label>
                   <input
@@ -131,13 +123,12 @@ export default function ScanPage() {
                   </div>
                 </div>
 
-                {/* Industry */}
-                <div className="mb-4">
-                  <label className="text-xs text-slate-400 font-500 mb-2 block">Industry Focus</label>
+                <div>
+                  <label className="text-xs text-slate-400 font-medium mb-2 block">Industry Focus</label>
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       onClick={() => setConfig(c => ({ ...c, industry: '' }))}
-                      className={`px-2 py-1 rounded-md text-[11px] font-500 transition-all border
+                      className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all border
                         ${!config.industry
                           ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/20'
                           : 'text-slate-500 border-white/[0.06] hover:border-white/[0.12]'}`}
@@ -148,7 +139,7 @@ export default function ScanPage() {
                       <button
                         key={ind}
                         onClick={() => setConfig(c => ({ ...c, industry: ind }))}
-                        className={`px-2 py-1 rounded-md text-[11px] font-500 transition-all border
+                        className={`px-2 py-1 rounded-md text-[11px] font-medium transition-all border
                           ${config.industry === ind
                             ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/20'
                             : 'text-slate-500 border-white/[0.06] hover:border-white/[0.12]'}`}
@@ -161,62 +152,51 @@ export default function ScanPage() {
               </Card>
 
               {/* Signal types */}
-              <Card className="p-5">
-                <h2 className="text-sm font-600 text-white mb-3">Signal Types</h2>
-                <div className="space-y-2">
+              <Card className="p-4 sm:p-5">
+                <h2 className="text-sm font-semibold text-white mb-3">Signal Types</h2>
+                {/* Grid on mobile, list on desktop */}
+                <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                   {SIGNAL_TYPES.map(sig => (
                     <button
                       key={sig.id}
                       onClick={() => setConfig(c => ({ ...c, signalType: c.signalType === sig.id ? '' : sig.id }))}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all border text-left
+                      className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg transition-all border text-left
                         ${config.signalType === sig.id
                           ? 'bg-indigo-500/10 border-indigo-500/20'
                           : 'border-white/[0.06] hover:bg-white/[0.03]'}`}
                     >
-                      <span className="text-lg">{sig.icon}</span>
-                      <div>
-                        <div className="text-xs font-500 text-slate-200">{sig.label}</div>
-                        <div className="text-[10px] text-slate-500">{sig.desc}</div>
+                      <span className="text-base sm:text-lg shrink-0">{sig.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium text-slate-200 truncate">{sig.label}</div>
+                        <div className="text-[10px] text-slate-500 hidden sm:block truncate">{sig.desc}</div>
                       </div>
                     </button>
                   ))}
                 </div>
               </Card>
 
-              <Button
-                onClick={runDiscover}
-                loading={loading}
-                className="w-full"
-                size="lg"
-              >
+              <Button onClick={runDiscover} loading={loading} className="w-full" size="lg">
                 <Zap size={15} />
                 {loading ? 'Scanning...' : 'Run AI Scanner'}
               </Button>
             </>
           ) : (
-            <Card className="p-5">
-              <h2 className="text-sm font-600 text-white mb-3">Paste Company Info</h2>
+            <Card className="p-4 sm:p-5">
+              <h2 className="text-sm font-semibold text-white mb-3">Paste Company Info</h2>
               <p className="text-xs text-slate-500 mb-3">
-                Paste a LinkedIn post, job listing, news article, or any text mentioning a company.
-                AI will extract and score the lead automatically.
+                Paste a LinkedIn post, job listing, or news article. AI will extract and score the lead.
               </p>
               <textarea
                 value={pastedText}
                 onChange={e => setPastedText(e.target.value)}
-                placeholder="Paste text here... e.g. 'Acme Corp just raised $5M Series A and is hiring 3 SDRs to expand into Europe...'"
-                rows={8}
+                placeholder="Paste text here... e.g. 'Acme Corp just raised $5M Series A and is hiring 3 SDRs...'"
+                rows={6}
                 className="w-full px-3 py-2.5 text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg
                   text-slate-300 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50
                   transition-all resize-none"
               />
-              <Button
-                onClick={runFromText}
-                loading={loading}
-                className="w-full mt-3"
-                size="md"
-              >
-                <Sparkles size={14} />
-                Extract & Score Lead
+              <Button onClick={runFromText} loading={loading} className="w-full mt-3" size="md">
+                <Sparkles size={14} /> Extract & Score Lead
               </Button>
             </Card>
           )}
@@ -224,18 +204,18 @@ export default function ScanPage() {
 
         {/* Results */}
         <div className="lg:col-span-2">
-          {/* Progress bar */}
+          {/* Progress */}
           {loading && progress > 0 && (
-            <Card className="p-5 mb-4">
+            <Card className="p-4 sm:p-5 mb-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center shrink-0">
                   <Search size={13} className="text-indigo-400 animate-pulse" />
                 </div>
-                <div>
-                  <div className="text-sm font-500 text-white">AI Scanning in progress...</div>
-                  <div className="text-xs text-slate-500">Discovering companies and scoring intent</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white">AI Scanning...</div>
+                  <div className="text-xs text-slate-500 hidden sm:block">Discovering companies and scoring intent</div>
                 </div>
-                <span className="ml-auto text-sm font-600 text-indigo-400">{Math.round(progress)}%</span>
+                <span className="text-sm font-semibold text-indigo-400 shrink-0">{Math.round(progress)}%</span>
               </div>
               <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
                 <div
@@ -243,29 +223,28 @@ export default function ScanPage() {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                {['Searching signals', 'Enriching companies', 'Scoring with AI'].map((step, i) => (
-                  <div key={i} className={`flex items-center gap-2 text-xs ${progress > (i + 1) * 30 ? 'text-emerald-400' : 'text-slate-600'}`}>
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                {['Searching signals', 'Enriching', 'Scoring with AI'].map((step, i) => (
+                  <div key={i} className={`flex items-center gap-1.5 text-[10px] sm:text-xs ${progress > (i + 1) * 30 ? 'text-emerald-400' : 'text-slate-600'}`}>
                     {progress > (i + 1) * 30
-                      ? <CheckCircle size={11} />
-                      : <div className="w-2.5 h-2.5 rounded-full border border-current opacity-40" />
+                      ? <CheckCircle size={11} className="shrink-0" />
+                      : <div className="w-2 h-2 rounded-full border border-current opacity-40 shrink-0" />
                     }
-                    {step}
+                    <span className="truncate">{step}</span>
                   </div>
                 ))}
               </div>
             </Card>
           )}
 
-          {/* Results list */}
           {results.length > 0 ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-400">
-                  <span className="font-600 text-white">{results.length}</span> leads discovered
+                  <span className="font-semibold text-white">{results.length}</span> leads discovered
                 </span>
                 <Button variant="secondary" size="sm" onClick={() => navigate('/leads')}>
-                  View all leads <ArrowRight size={12} />
+                  View all <ArrowRight size={12} />
                 </Button>
               </div>
               {results.map((lead, i) => (
@@ -273,46 +252,45 @@ export default function ScanPage() {
                   key={lead._id || i}
                   hover
                   onClick={() => lead._id && navigate(`/leads/${lead._id}`)}
-                  className="p-4 animate-fade-in-up"
-                  style={{ animationDelay: `${i * 50}ms` }}
+                  className="p-3 sm:p-4"
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getCompanyColor(lead.companyName)}
-                      flex items-center justify-center text-sm font-700 text-white shrink-0`}>
+                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br ${getCompanyColor(lead.companyName)}
+                      flex items-center justify-center text-xs sm:text-sm font-bold text-white shrink-0`}>
                       {getInitials(lead.companyName)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-sm font-600 text-white">{lead.companyName}</span>
+                        <span className="text-sm font-semibold text-white">{lead.companyName}</span>
                         <Badge className={getIntentBg(lead.intentLabel)}>{lead.intentLabel}</Badge>
                         {lead.stage && (
-                          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20">{lead.stage}</Badge>
+                          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 hidden sm:inline-flex">{lead.stage}</Badge>
                         )}
                       </div>
-                      <div className="text-xs text-slate-500 mb-2">{lead.industry} · {lead.location}</div>
+                      <div className="text-xs text-slate-500 mb-2">{lead.industry}{lead.location ? ` · ${lead.location}` : ''}</div>
                       {lead.description && (
                         <p className="text-xs text-slate-400 mb-2 line-clamp-2">{lead.description}</p>
                       )}
                       {lead.signals?.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {lead.signals.slice(0, 3).map((sig, j) => (
-                            <span key={j} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-500 border ${getSignalColor(sig.type)}`}>
+                          {lead.signals.slice(0, 2).map((sig, j) => (
+                            <span key={j} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium border ${getSignalColor(sig.type)}`}>
                               {getSignalIcon(sig.type)} {sig.type}
                             </span>
                           ))}
+                          {lead.signals.length > 2 && <span className="text-[10px] text-slate-600">+{lead.signals.length - 2}</span>}
                         </div>
                       )}
-                    </div>
-                    <div className="w-24 shrink-0">
-                      <div className="text-[10px] text-slate-600 mb-1">Score</div>
-                      <ScoreBar score={lead.intentScore} />
+                      <div className="mt-2">
+                        <ScoreBar score={lead.intentScore} />
+                      </div>
                     </div>
                   </div>
                   {lead.aiSummary && (
                     <div className="mt-3 pt-3 border-t border-white/[0.04]">
                       <div className="flex items-center gap-1.5 mb-1">
                         <Zap size={10} className="text-indigo-400" />
-                        <span className="text-[10px] text-indigo-400 font-500">AI Insight</span>
+                        <span className="text-[10px] text-indigo-400 font-medium">AI Insight</span>
                       </div>
                       <p className="text-xs text-slate-500 line-clamp-2">{lead.aiSummary}</p>
                     </div>
@@ -321,12 +299,12 @@ export default function ScanPage() {
               ))}
             </div>
           ) : !loading ? (
-            <Card className="flex flex-col items-center justify-center py-20">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
-                <Sparkles size={24} className="text-indigo-400" />
+            <Card className="flex flex-col items-center justify-center py-16 sm:py-20">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
+                <Sparkles size={22} className="text-indigo-400" />
               </div>
-              <h3 className="text-sm font-600 text-slate-300 mb-2">Ready to scan</h3>
-              <p className="text-xs text-slate-500 text-center max-w-xs">
+              <h3 className="text-sm font-semibold text-slate-300 mb-2">Ready to scan</h3>
+              <p className="text-xs text-slate-500 text-center max-w-xs px-4">
                 Configure your filters and click "Run AI Scanner" to discover high-intent companies
               </p>
             </Card>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Settings, Key, Database, Zap, Save, RefreshCw, Info } from 'lucide-react'
+import { Settings, Key, Database, Zap, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { scanApi } from '../utils/api'
 import { Card, Button, Badge } from '../components/ui/index'
@@ -21,28 +21,28 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in-up max-w-3xl">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-2xl">
       <div>
-        <h1 className="text-xl font-700 text-white">Settings</h1>
-        <p className="text-sm text-slate-500 mt-0.5">Configure your LeadIQ platform</p>
+        <h1 className="text-lg sm:text-xl font-bold text-white">Settings</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Configure your LeadIQ platform</p>
       </div>
 
-      {/* API Config */}
-      <Card className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+      {/* AI Config */}
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-center gap-3 mb-4 sm:mb-5">
+          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
             <Key size={14} className="text-indigo-400" />
           </div>
-          <div>
-            <h2 className="text-sm font-600 text-white">AI Configuration</h2>
-            <p className="text-xs text-slate-500">Groq API with Llama 3.3 70B (free tier)</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold text-white">AI Configuration</h2>
+            <p className="text-xs text-slate-500 truncate">Groq API · Llama 3.3 70B (free tier)</p>
           </div>
-          <Badge className="ml-auto bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>
+          <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shrink-0">Active</Badge>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
-            <label className="text-xs text-slate-400 font-500 mb-1.5 block">Model</label>
+            <label className="text-xs text-slate-400 font-medium mb-1.5 block">Model</label>
             <input
               disabled
               value="llama-3.3-70b-versatile"
@@ -50,7 +50,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="text-xs text-slate-400 font-500 mb-1.5 block">Groq API Key</label>
+            <label className="text-xs text-slate-400 font-medium mb-1.5 block">Groq API Key</label>
             <input
               type="password"
               placeholder="Set in backend .env → GROQ_API_KEY"
@@ -65,18 +65,18 @@ export default function SettingsPage() {
       </Card>
 
       {/* Database */}
-      <Card className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-center gap-3 mb-4 sm:mb-5">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
             <Database size={14} className="text-blue-400" />
           </div>
-          <div>
-            <h2 className="text-sm font-600 text-white">Database</h2>
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-white">Database</h2>
             <p className="text-xs text-slate-500">MongoDB connection</p>
           </div>
         </div>
         <div>
-          <label className="text-xs text-slate-400 font-500 mb-1.5 block">MongoDB URI</label>
+          <label className="text-xs text-slate-400 font-medium mb-1.5 block">MongoDB URI</label>
           <input
             type="password"
             placeholder="Set in backend .env → MONGODB_URI"
@@ -90,30 +90,28 @@ export default function SettingsPage() {
       </Card>
 
       {/* Bulk operations */}
-      <Card className="p-5">
-        <div className="flex items-center gap-3 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-center gap-3 mb-4 sm:mb-5">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
             <Zap size={14} className="text-amber-400" />
           </div>
-          <div>
-            <h2 className="text-sm font-600 text-white">Bulk Operations</h2>
-            <p className="text-xs text-slate-500">Batch AI operations on your lead database</p>
+          <div className="min-w-0">
+            <h2 className="text-sm font-semibold text-white">Bulk Operations</h2>
+            <p className="text-xs text-slate-500">Batch AI operations on your leads</p>
           </div>
         </div>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+          <div className="flex items-start sm:items-center justify-between gap-3 flex-col sm:flex-row">
             <div>
-              <div className="text-sm font-500 text-slate-200">Re-score all leads</div>
+              <div className="text-sm font-medium text-slate-200">Re-score all leads</div>
               <div className="text-xs text-slate-500 mt-0.5">Run AI scoring on every lead in your database</div>
             </div>
-            <Button onClick={handleBulkScore} loading={bulkLoading} variant="secondary" size="sm">
-              <RefreshCw size={12} />
-              Run
+            <Button onClick={handleBulkScore} loading={bulkLoading} variant="secondary" size="sm" className="shrink-0 self-start sm:self-auto">
+              <RefreshCw size={12} /> Run
             </Button>
           </div>
         </div>
       </Card>
-
     </div>
   )
 }

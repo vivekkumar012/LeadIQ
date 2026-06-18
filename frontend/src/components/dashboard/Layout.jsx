@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import {
-  LayoutDashboard, Zap, Users, Settings, TrendingUp,
-  Bell, Search, ChevronRight, Sparkles, Activity
+  LayoutDashboard, Zap, Users, Settings,
+  Bell, Search, ChevronRight, Sparkles, Activity, X, Menu
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -14,16 +14,30 @@ const navItems = [
 
 export default function Layout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
 
   const currentPage = navItems.find(n => location.pathname.startsWith(n.to))?.label || 'LeadIQ'
 
   return (
     <div className="flex h-screen bg-[#080d1a] overflow-hidden">
-      {/* Sidebar */}
+
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — hidden on mobile unless mobileOpen, always visible lg+ */}
       <aside
-        className={`flex flex-col shrink-0 transition-all duration-300 ease-in-out border-r border-white/[0.06]
-          ${collapsed ? 'w-16' : 'w-60'}`}
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-40 flex flex-col shrink-0
+          transition-all duration-300 ease-in-out border-r border-white/[0.06]
+          ${collapsed ? 'w-16' : 'w-60'}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
         style={{ background: 'linear-gradient(180deg, #0d1525 0%, #080d1a 100%)' }}
       >
         {/* Logo */}
@@ -32,10 +46,19 @@ export default function Layout() {
             <Sparkles size={15} className="text-white" />
           </div>
           {!collapsed && (
-            <div className="flex flex-col animate-fade-in-up">
-              <span className="text-sm font-700 text-white tracking-tight">LeadIQ</span>
-              <span className="text-[10px] text-slate-500 font-500">AI Sales Intelligence</span>
+            <div className="flex flex-col flex-1">
+              <span className="text-sm font-bold text-white tracking-tight">LeadIQ</span>
+              <span className="text-[10px] text-slate-500">AI Sales Intelligence</span>
             </div>
+          )}
+          {/* Close button on mobile */}
+          {!collapsed && (
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <X size={16} />
+            </button>
           )}
         </div>
 
@@ -45,6 +68,7 @@ export default function Layout() {
             <NavLink
               key={to}
               to={to}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group relative
                 ${isActive
@@ -60,10 +84,10 @@ export default function Layout() {
                   )}
                   <Icon size={17} className="shrink-0" />
                   {!collapsed && (
-                    <span className="text-sm font-500">{label}</span>
+                    <span className="text-sm font-medium">{label}</span>
                   )}
                   {!collapsed && label === 'AI Scanner' && (
-                    <span className="ml-auto text-[9px] font-600 bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded-full border border-indigo-500/20">
+                    <span className="ml-auto text-[9px] font-semibold bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded-full border border-indigo-500/20">
                       AI
                     </span>
                   )}
@@ -78,7 +102,7 @@ export default function Layout() {
           <div className="m-3 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
             <div className="flex items-center gap-2 mb-2">
               <Activity size={12} className="text-emerald-400" />
-              <span className="text-[11px] text-slate-400 font-500">System Status</span>
+              <span className="text-[11px] text-slate-400 font-medium">System Status</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -87,50 +111,85 @@ export default function Layout() {
           </div>
         )}
 
-        {/* Collapse button */}
+        {/* Collapse button — desktop only */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center h-10 border-t border-white/[0.06] text-slate-500 hover:text-slate-300 transition-colors"
+          className="hidden lg:flex items-center justify-center h-10 border-t border-white/[0.06] text-slate-500 hover:text-slate-300 transition-colors"
         >
           <ChevronRight size={14} className={`transition-transform duration-300 ${collapsed ? '' : 'rotate-180'}`} />
         </button>
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Topbar */}
-        <header className="h-14 flex items-center justify-between px-6 border-b border-white/[0.06] shrink-0"
-          style={{ background: 'rgba(8,13,26,0.8)', backdropFilter: 'blur(12px)' }}>
+        <header
+          className="h-14 flex items-center justify-between px-4 sm:px-6 border-b border-white/[0.06] shrink-0"
+          style={{ background: 'rgba(8,13,26,0.8)', backdropFilter: 'blur(12px)' }}
+        >
           <div className="flex items-center gap-2">
-            <span className="text-slate-500 text-sm">LeadIQ</span>
-            <ChevronRight size={14} className="text-slate-600" />
-            <span className="text-sm font-500 text-slate-200">{currentPage}</span>
+            {/* Hamburger — mobile only */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] transition-all mr-1"
+            >
+              <Menu size={17} />
+            </button>
+            <span className="text-slate-500 text-sm hidden sm:block">LeadIQ</span>
+            <ChevronRight size={14} className="text-slate-600 hidden sm:block" />
+            <span className="text-sm font-medium text-slate-200">{currentPage}</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Search — hidden on small mobile */}
+            <div className="relative hidden sm:block">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder="Quick search..."
                 className="h-8 pl-8 pr-3 text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg text-slate-300
-                  placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all w-48"
+                  placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all w-36 lg:w-48"
               />
             </div>
             <button className="relative w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] transition-all">
               <Bell size={16} />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
             </button>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-700 text-white shadow">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow">
               A
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-16 lg:pb-0">
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 lg:hidden border-t border-white/[0.06] flex"
+        style={{ background: 'rgba(8,13,26,0.97)', backdropFilter: 'blur(16px)' }}>
+        {navItems.map(({ to, icon: Icon, label }) => (
+          <NavLink
+            key={to}
+            to={to}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-all
+              ${isActive ? 'text-indigo-400' : 'text-slate-500 hover:text-slate-300'}`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <div className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all ${isActive ? 'bg-indigo-500/15' : ''}`}>
+                  <Icon size={17} />
+                </div>
+                <span>{label === 'AI Scanner' ? 'Scanner' : label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
     </div>
   )
 }
